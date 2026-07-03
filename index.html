@@ -3,13 +3,23 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>SPARK — передай мяч</title>
+  <title>SPARK — передай бомбу</title>
   <!-- Telegram WebApp SDK (безопасно вне ТГ: window.Telegram просто не определится) -->
   <script src="https://telegram.org/js/telegram-web-app.js?62"></script>
-  <script type="module" crossorigin src="./assets/index-YnZP2-JO.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-b6utUmWt.css">
+  <style>
+    /* прелоадер (п.9) — показывается пока грузится JS */
+    #preloader { position: fixed; inset: 0; background: #0d0d14; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; transition: opacity .4s; }
+    #preloader.hide { opacity: 0; pointer-events: none; }
+    .pl-logo { font-size: 56px; margin-bottom: 20px; filter: drop-shadow(0 0 24px rgba(255,107,26,.4)); animation: plPulse 1.5s ease-in-out infinite; }
+    @keyframes plPulse { 0%,100%{opacity:.7;transform:scale(.95)} 50%{opacity:1;transform:scale(1.05)} }
+    .pl-spinner { width: 28px; height: 28px; border: 2.5px solid rgba(255,255,255,.1); border-top-color: #ff6b1a; border-radius: 50%; animation: plSpin .8s linear infinite; }
+    @keyframes plSpin { to { transform: rotate(360deg); } }
+  </style>
+  <script type="module" crossorigin src="./assets/index-DUaVD-T1.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-D6NzBTlJ.css">
 </head>
 <body>
+  <div id="preloader"><div class="pl-logo">🔥</div><div class="pl-spinner"></div></div>
   <div id="app"></div>
 </body>
 </html>
