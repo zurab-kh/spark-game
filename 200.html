@@ -42,7 +42,9 @@
     --display: 'Sora', sans-serif;
     --mono: 'JetBrains Mono', monospace;
     --glitch: 'Sora', sans-serif;
-    --chrome-top: calc(max(13px, env(safe-area-inset-top)) + 55px + 30px);
+    --header-h: 56px;
+    --strip-h: 24px;
+    --chrome-top: calc(max(13px, env(safe-area-inset-top)) + var(--header-h) + var(--strip-h));
     --spark-size: clamp(64px, 17vw, 86px);
     --spark-half: calc(var(--spark-size) / 2);
     --wire-top: 58%;
@@ -124,7 +126,7 @@
   /* trust strip */
   .trust-strip {
     display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap;
-    padding: 6px 12px 8px; font-family: var(--mono); font-size: 11px; color: var(--dim);
+    padding: 4px 12px 5px; font-family: var(--mono); font-size: 10.5px; color: var(--dim);
     border-bottom: 1px solid var(--border); background: rgba(8,8,10,0.95); z-index: 99; position: relative;
   }
   .trust-strip .dot { color: var(--safe); }
@@ -763,12 +765,14 @@
       --pass-h: 88px;
       --pass-font: 52px;
     }
-    body { align-items: flex-start; padding: max(10px, env(safe-area-inset-top)) 0 max(10px, env(safe-area-inset-bottom)); }
+    /* внутри Telegram — на весь экран; в браузере — карточка с отступами */
+    body:not(.tg-fullscreen) { align-items: flex-start; padding: max(10px, env(safe-area-inset-top)) 0 max(10px, env(safe-area-inset-bottom)); }
     .app-container {
-      max-width: 520px; height: min(100svh, 920px);
+      max-width: 520px; height: min(var(--app-h), 920px); min-height: 0;
       border-radius: 16px;
       box-shadow: 0 0 0 1px var(--border), 0 20px 70px rgba(0,0,0,.5);
     }
+    body.tg-fullscreen .app-container { height: var(--app-h); border-radius: 0; box-shadow: none; }
     .lobby-hero .play-hit .play-big { font-size: 28px; padding: 20px; }
     .match-wrap { max-width: 380px; }
     .mp-room-code { font-size: 54px; }
@@ -778,7 +782,8 @@
   /* ——— Tablet landscape / iPad ——— */
   @media (min-width: 768px) {
     :root { --overlay-max: 460px; }
-    .app-container { max-width: 560px; height: min(100svh, 880px); }
+    .app-container { max-width: 560px; height: min(var(--app-h), 880px); min-height: 0; }
+    body.tg-fullscreen .app-container { height: var(--app-h); }
     .zone-charge { font-size: 28px; }
     .intro-wrap { max-width: 420px; }
   }
@@ -786,7 +791,8 @@
   /* ——— Phone / tablet landscape (compressed chrome + arena) ——— */
   @media (orientation: landscape) and (max-height: 520px) {
     :root {
-      --chrome-top: calc(max(8px, env(safe-area-inset-top)) + 48px + 26px);
+      --header-h: 48px;
+      --strip-h: 24px;
       --zone-pad-top: clamp(28px, 7vh, 44px);
       --wire-top: 52%;
       --spark-size: clamp(48px, 12vw, 64px);
@@ -820,31 +826,34 @@
 
   /* ——— Desktop ——— */
   @media (min-width: 1024px) {
-    body {
+    body:not(.tg-fullscreen) {
       align-items: center; min-height: 100dvh;
       background: radial-gradient(ellipse 70% 55% at 50% 18%, #1c1612 0%, var(--void) 58%);
     }
     .app-container {
-      margin: auto; max-width: 580px; height: min(100svh, 940px);
+      margin: auto; max-width: 580px; height: min(var(--app-h), 940px); min-height: 0;
       border-radius: 18px;
       box-shadow: 0 0 0 1px var(--border), 0 28px 90px rgba(0,0,0,.55);
     }
+    body.tg-fullscreen .app-container { height: var(--app-h); border-radius: 0; box-shadow: none; margin: 0; }
   }
 
   /* ——— Large monitors (27–32") ——— */
   @media (min-width: 1440px) {
     :root { --overlay-max: 460px; }
-    body { background: radial-gradient(ellipse 65% 50% at 50% 15%, #221a14 0%, #0a0a0c 45%, var(--void) 72%); }
+    body:not(.tg-fullscreen) { background: radial-gradient(ellipse 65% 50% at 50% 15%, #221a14 0%, #0a0a0c 45%, var(--void) 72%); }
     .app-container {
-      max-width: 620px; height: min(100svh, 980px); border-radius: 22px;
+      max-width: 620px; height: min(var(--app-h), 980px); min-height: 0; border-radius: 22px;
       box-shadow: 0 0 0 1px rgba(58,58,68,.8), 0 40px 120px rgba(0,0,0,.7), 0 0 80px rgba(255,107,26,.04);
     }
+    body.tg-fullscreen .app-container { height: var(--app-h); border-radius: 0; box-shadow: none; }
     .mcard { max-width: 440px; }
   }
 
   @media (min-width: 1920px) {
     :root { --overlay-max: 480px; }
-    .app-container { max-width: 660px; height: min(100svh, 1020px); }
+    .app-container { max-width: 660px; height: min(var(--app-h), 1020px); min-height: 0; }
+    body.tg-fullscreen .app-container { height: var(--app-h); }
     .brand { font-size: 28px; }
     .logo-svg { width: 34px; height: 34px; }
     .balance { font-size: 18px; }
@@ -853,9 +862,10 @@
   @media (min-width: 2560px) {
     :root { --overlay-max: 500px; }
     .app-container {
-      max-width: 700px; height: min(100svh, 1080px); border-radius: 24px;
+      max-width: 700px; height: min(var(--app-h), 1080px); min-height: 0; border-radius: 24px;
       box-shadow: 0 0 0 1px var(--border2), 0 48px 140px rgba(0,0,0,.75), 0 0 100px rgba(255,107,26,.05);
     }
+    body.tg-fullscreen .app-container { height: var(--app-h); border-radius: 0; box-shadow: none; }
     .menu-wrap, .intro-wrap, .match-wrap, .result-wrap { max-width: 500px; }
     .mcard { max-width: 460px; }
   }
@@ -1208,6 +1218,7 @@
   const tg = (function(){ try { return window.Telegram && window.Telegram.WebApp; } catch(e){ return null; } })();
   function initTg(){
     if(!tg) return;
+    document.body.classList.add("tg-fullscreen");
     try { tg.ready(); } catch(e){}
     // expand часто не срабатывает с первого раза — повторяем с задержками
     const doExpand = () => { try { tg.expand(); } catch(e){} };
@@ -2679,7 +2690,7 @@
   });
 
   // ============ INIT ============
-  const BUILD_ID = "20260709e";
+  const BUILD_ID = "20260709f";
   try {
     const seen = sessionStorage.getItem("hotwire_build");
     if(seen !== BUILD_ID && !/[?&]v=/.test(location.search)){
