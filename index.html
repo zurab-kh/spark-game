@@ -18,6 +18,7 @@
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=JetBrains+Mono:wght@700;800&family=Inter:wght@400;500;600;700&display=swap"></noscript>
 <style>
   :root {
+    --app-h: 100dvh;
     --void: #060810;
     --panel: #0d1018;
     --panel2: #131825;
@@ -73,7 +74,7 @@
   }
 
   .app-container {
-    width: 100%; max-width: 480px; height: 100dvh; height: 100svh; display: flex; flex-direction: column;
+    width: 100%; max-width: 480px; height: var(--app-h); min-height: var(--app-h); display: flex; flex-direction: column;
     margin: 0 auto; position: relative;
     background:
       radial-gradient(ellipse 120% 50% at 50% 0%, rgba(255,107,26,.10) 0%, transparent 55%),
@@ -1194,10 +1195,47 @@
   <div class="toast" id="toast"></div>
 </div>
 
+<!-- Telegram WebApp SDK (безопасно вне ТГ: window.Telegram просто не определится) -->
+<script src="https://telegram.org/js/telegram-web-app.js?62"></script>
 <script>
 "use strict";
 (function(){
   const $ = id => document.getElementById(id);
+
+  // ============ TELEGRAM MINI APP ============
+  // Полноэкранный режим, цвет хедера/фона TG, запрет pull-to-refresh, тактильная отдача.
+  // Всё в try/catch — приложение работает и вне Telegram (браузер/превью).
+  const tg = (function(){ try { return window.Telegram && window.Telegram.WebApp; } catch(e){ return null; } })();
+  function initTg(){
+    if(!tg) return;
+    try { tg.ready(); } catch(e){}
+    // expand часто не срабатывает с первого раза — повторяем с задержками
+    const doExpand = () => { try { tg.expand(); } catch(e){} };
+    doExpand();
+    setTimeout(doExpand, 300);
+    setTimeout(doExpand, 800);
+    setTimeout(doExpand, 1500);
+    try { if(tg.disableVerticalSwipes) tg.disableVerticalSwipes(); } catch(e){}
+    try { if(tg.setHeaderColor) tg.setHeaderColor("#060810"); } catch(e){}
+    try { if(tg.setBackgroundColor) tg.setBackgroundColor("#060810"); } catch(e){}
+  }
+  // Тактильная отдача. type: light|medium|heavy|error|success|warning|select
+  function haptic(type){
+    if(!tg || !tg.HapticFeedback) return;
+    try {
+      if(type === "error" || type === "success" || type === "warning") tg.HapticFeedback.notificationOccurred(type);
+      else if(type === "select") tg.HapticFeedback.selectionChanged();
+      else tg.HapticFeedback.impactOccurred(type || "medium");
+    } catch(e){}
+  }
+  // Telegram меняет высоту вьюпорта асинхронно. Синхронизируем --app-h с реальной высотой,
+  // чтобы кнопка pass и контент не срезались за нижним краем.
+  function syncViewportHeight(){
+    let h = 0;
+    if(tg && tg.viewportStableHeight) h = tg.viewportStableHeight;
+    if(!h) h = window.innerHeight;
+    document.documentElement.style.setProperty("--app-h", h + "px");
+  }
 
   // ============ CONFIG ============
   const RTP = 0.95;
@@ -2172,6 +2210,7 @@
     save();
 
     phase = "running";
+    haptic("light");
     m = 1.00;
     authM = 1.00;
     authAt = performance.now();
@@ -2210,6 +2249,7 @@
   function handlePass(){
     if(phase !== "running" || holder !== 1 || lockout) return;
     initAudio();
+    haptic("medium");
     // remote doesn't apply the pass locally — it sends intent to the host, which
     // validates (turn + lockout) and broadcasts the resulting holder change back.
     if(role === "remote"){ send({ type:"pass" }); return; }
@@ -2273,6 +2313,7 @@
   function handleShort(playSound = true){
     if(phase === "resolving") return;  // anti-double-resolve
     phase = "resolving";
+    haptic(holder === 1 ? "error" : "success");
     if(role === "host"){ send({ type:"short", loser: holder, m }); sfx("short"); }
     else if(playSound){ initAudio(); playShort(); }
     updateVisuals();
@@ -2638,7 +2679,7 @@
   });
 
   // ============ INIT ============
-  const BUILD_ID = "20260709d";
+  const BUILD_ID = "20260709e";
   try {
     const seen = sessionStorage.getItem("hotwire_build");
     if(seen !== BUILD_ID && !/[?&]v=/.test(location.search)){
@@ -2649,6 +2690,12 @@
 
   loadMpLogs();
   mpLog("app:init", { ua: navigator.userAgent.slice(0, 80), signal: SIGNAL_URL });
+  // Telegram: fullscreen, цвета, тактильность. Регистрируем слушатель высоты вьюпорта.
+  initTg();
+  syncViewportHeight();
+  try { if(tg && tg.onEvent) tg.onEvent("viewportChanged", syncViewportHeight); } catch(e){}
+  window.addEventListener("resize", syncViewportHeight);
+  window.addEventListener("orientationchange", ()=> setTimeout(syncViewportHeight, 300));
   load();
   ensurePlayableBalance();
   if($("walletAddr")) $("walletAddr").textContent = DEMO_DEPOSIT_ADDR;
