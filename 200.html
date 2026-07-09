@@ -2379,10 +2379,10 @@
     // pass counters
     if(youPasses !== prevYP){ elChargeP1.textContent = youPasses + " пас"; prevYP = youPasses; }
     if(oppPasses !== prevOP){ elChargeP2.textContent = oppPasses + " пас"; prevOP = oppPasses; }
+    // controls (diff-guarded internally; safe every frame, keeps heat readout live)
+    updateControls();
   }
 
-  function updateControls(){
-    if(phase !== "running") return;
   let prevCtrlState = "";
   function updateControls(){
     if(phase !== "running") return;
@@ -2638,7 +2638,7 @@
   });
 
   // ============ INIT ============
-  const BUILD_ID = "20260709c";
+  const BUILD_ID = "20260709d";
   try {
     const seen = sessionStorage.getItem("hotwire_build");
     if(seen !== BUILD_ID && !/[?&]v=/.test(location.search)){
