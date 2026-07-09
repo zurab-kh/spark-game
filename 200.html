@@ -1048,7 +1048,7 @@
   <div class="sheet" id="friendSheet">
     <div class="sheet-card">
       <div class="sheet-head">
-        <h3>Challenge friend</h3>
+        <h3>Вызов друга</h3>
         <button type="button" class="sheet-close" id="friendSheetClose">×</button>
       </div>
       <div class="mode-toggle" id="mpModeToggle" style="margin-top:0;margin-bottom:12px;">
@@ -1056,10 +1056,10 @@
         <div class="mt" data-mp="join">Join<span class="sub">enter code</span></div>
       </div>
       <div id="mpCreate">
-        <div class="step">Share room code</div>
+        <div class="step">Поделись кодом комнаты</div>
         <div class="mp-room-code" id="mpRoomCode">------</div>
         <div class="mp-row">
-          <button type="button" class="screen-btn ghost" id="mpCreateBtn">Create room</button>
+          <button type="button" class="screen-btn ghost" id="mpCreateBtn">Создать комнату</button>
           <button type="button" class="screen-btn ghost" id="mpCopyCode">Copy</button>
         </div>
       </div>
@@ -1067,12 +1067,12 @@
         <div class="step">Enter host code</div>
         <input class="mp-room-input" id="mpRoomInput" type="text" maxlength="8" placeholder="HW1A2B" autocapitalize="characters" autocomplete="off" spellcheck="false">
         <div class="mp-row">
-          <button type="button" class="screen-btn ghost" id="mpJoinBtn">Join room</button>
+          <button type="button" class="screen-btn ghost" id="mpJoinBtn">Войти в комнату</button>
         </div>
       </div>
-      <div class="mp-status" id="mpStatus">not connected</div>
+      <div class="mp-status" id="mpStatus">не подключено</div>
       <details class="mp-advanced">
-        <summary>Advanced / debug</summary>
+        <summary>Расширенные настройки</summary>
         <pre class="mp-log-preview" id="mpLogPreview">log ready</pre>
         <div class="mp-row">
           <button type="button" class="screen-btn ghost" id="mpDownloadLog">Download log</button>
@@ -1131,25 +1131,25 @@
   <div class="sheet" id="walletSheet">
     <div class="sheet-card">
       <div class="sheet-head">
-        <h3>Wallet</h3>
+        <h3>Кошелёк</h3>
         <button type="button" class="sheet-close" id="walletClose">×</button>
       </div>
-      <div class="wallet-bal">Available: <b id="walletAvail">0 USDT</b></div>
+      <div class="wallet-bal">Доступно: <b id="walletAvail">0 USDT</b></div>
       <div class="info-card" style="margin-bottom:12px">
         <div class="info-steps">
-          <div class="info-step"><div class="num green">+</div><div class="txt"><b>Deposit</b> — Demo credits for testing. Production connects your real <span class="c-g">USDT</span> wallet.</div></div>
-          <div class="info-step"><div class="num gold">↓</div><div class="txt"><b>Withdraw</b> — <span class="c-y">1 USDT</span> demo processing fee · min <span class="c-o">10 USDT</span>.</div></div>
+          <div class="info-step"><div class="num green">+</div><div class="txt"><b>Депозит</b> — Demo credits for testing. Production connects your real <span class="c-g">USDT</span> wallet.</div></div>
+          <div class="info-step"><div class="num gold">↓</div><div class="txt"><b>Вывод</b> — <span class="c-y">1 USDT</span> demo processing fee · min <span class="c-o">10 USDT</span>.</div></div>
         </div>
       </div>
       <div class="mode-toggle wallet-tabs" id="walletTabs">
-        <div class="mt sel" data-wallet="deposit">Deposit</div>
-        <div class="mt" data-wallet="withdraw">Withdraw</div>
+        <div class="mt sel" data-wallet="deposit">Депозит</div>
+        <div class="mt" data-wallet="withdraw">Вывод</div>
       </div>
       <div id="walletDeposit">
-        <div class="step">Network: TRC20 (demo)</div>
+        <div class="step">Сеть: TRC20 (демо)</div>
         <div class="wallet-addr" id="walletAddr">TDemoHotwire7xK9mPqR2vN4wL8jH5f</div>
-        <button type="button" class="screen-btn ghost" id="walletCopyAddr">Copy address</button>
-        <div class="lab" style="margin-top:14px">Quick demo top-up</div>
+        <button type="button" class="screen-btn ghost" id="walletCopyAddr">Копировать адрес</button>
+        <div class="lab" style="margin-top:14px">Быстрое пополнение (демо)</div>
         <div class="wallet-quick">
           <button type="button" data-demo-dep="100">+100</button>
           <button type="button" data-demo-dep="500">+500</button>
@@ -1157,11 +1157,11 @@
         </div>
       </div>
       <div id="walletWithdraw" style="display:none">
-        <label class="step">Amount (USDT)</label>
+        <label class="step">>Сумма (USDT)<</label>
         <input class="wallet-input" id="withdrawAmt" type="number" min="10" step="1" placeholder="100">
-        <label class="step">TRC20 address</label>
+        <label class="step">TRC20 адрес<</label>
         <input class="wallet-input" id="withdrawAddr" type="text" placeholder="T…" autocomplete="off">
-        <p class="wallet-note">Demo fee: 1 USDT · Min withdraw: 10 USDT</p>
+        <p class="wallet-note">Демо-комиссия: 1 USDT · Мин. вывод: 10 USDT</p>
         <button type="button" class="screen-btn" id="withdrawBtn">WITHDRAW</button>
       </div>
     </div>
@@ -1287,20 +1287,28 @@
 
   // ============ AUDIO ============
   const AudioCtx = window.AudioContext || window.webkitAudioContext;
-  let actx = null;
+  let actx = null, masterGain = null;
+  function ensureMaster(){
+    if(actx && !masterGain){
+      masterGain = actx.createGain();
+      masterGain.gain.value = 0.85;
+      masterGain.connect(actx.destination);
+    }
+  }
   function initAudio(){
     if(!actx){ try{ actx = new AudioCtx(); }catch(e){ return; } }
     if(actx.state === "suspended") actx.resume().catch(()=>{});
   }
   function tone(freq, durMs, type, vol, sweepTo){
     if(!actx) return;
+    ensureMaster();
     const t0 = actx.currentTime;
     const o = actx.createOscillator(), g = actx.createGain();
-    o.type = type; o.frequency.setValueAtTime(freq, t0);
+    o.type = type; o.frequency.setValueAtTime(Math.max(1, freq), t0);
     if(sweepTo) o.frequency.exponentialRampToValueAtTime(Math.max(1, sweepTo), t0 + durMs/1000);
     g.gain.setValueAtTime(vol, t0);
     g.gain.exponentialRampToValueAtTime(0.0008, t0 + durMs/1000);
-    o.connect(g); g.connect(actx.destination);
+    o.connect(g); g.connect(masterGain || actx.destination);
     o.start(t0); o.stop(t0 + durMs/1000 + 0.02);
   }
   function noiseBurst(durMs, vol, freq, type){
@@ -1315,10 +1323,10 @@
     const t0 = actx.currentTime;
     g.gain.setValueAtTime(vol, t0);
     g.gain.exponentialRampToValueAtTime(0.0008, t0 + durMs/1000);
-    src.connect(f); f.connect(g); g.connect(actx.destination);
+    src.connect(f); f.connect(g); g.connect(masterGain || actx.destination);
     src.start(t0); src.stop(t0 + durMs/1000 + 0.02);
   }
-  function playTick(m){ if(actx) tone(380 + m*90, 45, "square", 0.07); }
+  function playTick(m){ if(actx) tone(380 + m*90, 45, "square", 0.10); }
   function playSpark(){
     if(!actx) return;
     tone(900, 90, "sawtooth", 0.14, 1600);
@@ -1326,10 +1334,10 @@
   }
   function playShort(){
     if(!actx) return;
-    tone(120, 600, "sawtooth", 0.28, 28);
-    tone(180, 500, "square", 0.12, 40);
-    noiseBurst(700, 0.32, 1400, "lowpass");
-    noiseBurst(200, 0.14, 3200, "bandpass");
+    tone(120, 600, "sawtooth", 0.20, 28);
+    tone(180, 500, "square", 0.10, 40);
+    noiseBurst(700, 0.18, 1400, "lowpass");
+    noiseBurst(200, 0.12, 3200, "bandpass");
   }
   function playWin(){ if(actx){ tone(880, 120, "sine", 0.14); setTimeout(()=>tone(1320, 160, "sine", 0.12), 110); } }
   function playLose(){ if(actx) tone(300, 320, "sawtooth", 0.18, 90); }
@@ -2268,6 +2276,7 @@
   }
 
   function handleShort(playSound = true){
+    if(phase === "resolving") return;  // anti-double-resolve
     phase = "resolving";
     if(role === "host"){ send({ type:"short", loser: holder, m }); sfx("short"); }
     else if(playSound){ initAudio(); playShort(); }
@@ -2291,6 +2300,7 @@
   }
 
   function resolveRound(){
+    if(phase !== "resolving") return;  // anti-stale-resolve
     // Pure hot-potato. Whoever held the wire at SHORT loses their ante;
     // the survivor takes the whole pot minus the transparent 5% rake.
     const playerFried = (holder === 1);
@@ -2627,7 +2637,7 @@
   });
 
   // ============ INIT ============
-  const BUILD_ID = "20260709a";
+  const BUILD_ID = "20260709b";
   try {
     const seen = sessionStorage.getItem("hotwire_build");
     if(seen !== BUILD_ID && !/[?&]v=/.test(location.search)){
