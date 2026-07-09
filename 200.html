@@ -1,14 +1,21 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>SPARK — передай мяч</title>
-<link rel="canonical" href="https://hotwire-zu-game.surge.sh/">
+<title>SPARK — передай бомбу</title>
+<meta name="theme-color" content="#060810">
+<meta name="description" content="PvP дуэль: передавай бомбу, не держи при взрыве. Ставка 10 USDT, победитель забирает банк.">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' fill='%23060810'/%3E%3Ccircle cx='90' cy='100' r='45' fill='%23f97316'/%3E%3Cpath d='M90 30 Q100 20 105 25 Q108 15 98 10' stroke='%2352525b' stroke-width='4' fill='none'/%3E%3Ccircle cx='98' cy='10' r='6' fill='%23fbbf24'/%3E%3C/svg%3E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SPARK">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=JetBrains+Mono:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=JetBrains+Mono:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" onload="this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=JetBrains+Mono:wght@700;800&family=Inter:wght@400;500;600;700&display=swap"></noscript>
 <style>
   :root {
     --void: #060810;
@@ -214,15 +221,7 @@
   }
   .subtitle { font-family: 'Inter', sans-serif; font-size: 15px; color: var(--mut); margin: 0 0 22px; letter-spacing: .3px; font-weight: 500; }
 
-  .protocol {
-    background: rgba(255,255,255,.03); border: 1px solid var(--border); border-radius: 16px; padding: 16px 18px;
-    text-align: left; font-family: var(--mono); font-size: 14px; color: var(--mut);
-    width: 100%; margin-bottom: 20px; line-height: 1.7; backdrop-filter: blur(8px);
-  }
-  .protocol b { color: var(--ink); }
-  .protocol .o { color: var(--spark); }
-  .protocol .r { color: var(--short); font-weight: 700; }
-  .protocol .g { color: var(--safe); }
+  /* .protocol block removed (dead CSS — never used in HTML) */
 
   .screen-btn {
     background: linear-gradient(135deg, var(--spark-bright) 0%, var(--spark) 50%, #c2410c 100%); color: #fff; border: none; padding: clamp(14px, 2.5vh, 16px) clamp(20px, 5vw, 32px); border-radius: 14px;
@@ -490,8 +489,6 @@
   /* stats grid */
 
 
-  .menu-row { display: flex; gap: 8px; margin-top: 12px; }
-  .menu-row .screen-btn { font-size: 18px; padding: 13px; }
 
   /* history */
   .hist { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 4px 10px; max-height: 150px; overflow: auto; margin-top: 6px; }
@@ -626,7 +623,6 @@
     padding: 2px 8px; border-radius: 6px; margin-left: 6px;
   }
 
-  .text-win { color: var(--safe); } .text-lose { color: var(--short); }
 
   /* ===== MODALS ===== */
   .modal {
@@ -752,7 +748,6 @@
     .balance { font-size: 14px; }
     .deposit-btn { width: 30px; height: 30px; font-size: 18px; }
     .trust-strip { font-size: 10px; gap: 5px; padding: 5px 8px 7px; }
-    .menu-foot-note { font-size: 11px !important; }
     .zone-title { font-size: 11px; letter-spacing: 1px; }
   }
 
@@ -2353,53 +2348,59 @@
   }
 
   // ============ VISUALS ============
+  // Diff-guard: only write DOM when values actually change (O4 optimization)
+  let prevVolt = -1, prevHolder = 0, prevLockout = null, prevYP = -1, prevOP = -1, prevGlow = -1;
   function updateVisuals(){
-    // voltage is shown as the tension indicator only — it is NOT a payout multiplier
-    elVolt.textContent = String(Math.floor(m * 100));
-    if(holder === 1){
-      elZoneP1.classList.add("active"); elZoneP2.classList.remove("active");
-      elStatusP1.innerText = lockout ? "БЛОК" : "ДЕРЖУ";
-      elStatusP2.innerText = "ЖДЁТ";
-      elChargeP1.textContent = youPasses + " пас";
-      elChargeP2.textContent = oppPasses + " пас";
-      elSpark.className = "spark pos-1 " + (lockout ? "locked" : "");
-    } else {
-      elZoneP2.classList.add("active"); elZoneP1.classList.remove("active");
-      elStatusP1.innerText = "ЖДЁТ";
-      elStatusP2.innerText = lockout ? "БЛОК" : "ДЕРЖУ";
-      elChargeP1.textContent = youPasses + " пас";
-      elChargeP2.textContent = oppPasses + " пас";
-      elSpark.className = "spark pos-2 " + (lockout ? "locked" : "");
-    }
-    // tension colour on the big readout
-    if(m > 3.0) elVolt.style.color = "var(--short)";
-    else if(m > 1.8) elVolt.style.color = "var(--spark)";
-    else elVolt.style.color = "#fff";
-    // spark glow scales with voltage
+    const volt = Math.floor(m * 100);
+    if(volt !== prevVolt){ elVolt.textContent = String(volt); prevVolt = volt; }
+    // colour threshold
+    const colTarget = m > 3.0 ? "var(--short)" : m > 1.8 ? "var(--spark)" : "#fff";
+    if(elVolt.style.color !== colTarget) elVolt.style.color = colTarget;
+    // spark glow
     const glow = 20 + Math.min(40, (m - 1) * 12);
-    elSpark.style.filter = `drop-shadow(0 0 ${glow}px var(--spark-glow))`;
-    updateControls();
+    const glowI = Math.round(glow);
+    if(glowI !== prevGlow){ elSpark.style.filter = `drop-shadow(0 0 ${glow}px var(--spark-glow))`; prevGlow = glowI; }
+    // holder/lockout change → full update
+    if(holder !== prevHolder || lockout !== prevLockout){
+      prevHolder = holder; prevLockout = lockout;
+      if(holder === 1){
+        elZoneP1.classList.add("active"); elZoneP2.classList.remove("active");
+        elStatusP1.innerText = lockout ? "БЛОК" : "ДЕРЖУ";
+        elStatusP2.innerText = "ЖДЁТ";
+        elSpark.className = "spark pos-1 " + (lockout ? "locked" : "");
+      } else {
+        elZoneP2.classList.add("active"); elZoneP1.classList.remove("active");
+        elStatusP1.innerText = "ЖДЁТ";
+        elStatusP2.innerText = lockout ? "БЛОК" : "ДЕРЖУ";
+        elSpark.className = "spark pos-2 " + (lockout ? "locked" : "");
+      }
+      updateControls();
+    }
+    // pass counters
+    if(youPasses !== prevYP){ elChargeP1.textContent = youPasses + " пас"; prevYP = youPasses; }
+    if(oppPasses !== prevOP){ elChargeP2.textContent = oppPasses + " пас"; prevOP = oppPasses; }
   }
 
   function updateControls(){
     if(phase !== "running") return;
+  let prevCtrlState = "";
+  function updateControls(){
+    if(phase !== "running") return;
+    // вычисляем состояние кнопки
+    let state, txt, sub, disabled;
     if(holder === 1){
-      if(lockout){
-        elPassBtn.disabled = true;
-        elPassBtn.className = "pass-btn cooldown-state";
-        elBtnText.innerText = "БЛОК";
-        elBtnSub.innerText = "держись · мяч заряжается";
-      } else {
-        elPassBtn.disabled = false;
-        elPassBtn.className = "pass-btn";
-        elBtnText.innerText = "ПЕРЕДАТЬ";
-        elBtnSub.innerText = Math.floor(m * 100) + " нагрев · кинуть мяч";
-      }
+      if(lockout){ state = "pass-btn cooldown-state"; txt = "БЛОК"; sub = "держись · мяч заряжается"; disabled = true; }
+      else { state = "pass-btn"; txt = "ПЕРЕДАТЬ"; sub = Math.floor(m * 100) + " нагрев · кинуть мяч"; disabled = false; }
     } else {
-      elPassBtn.disabled = true;
-      elPassBtn.className = "pass-btn";
-      elBtnText.innerText = "ОЖИДАНИЕ";
-      elBtnSub.innerText = "мяч у соперника";
+      state = "pass-btn"; txt = "ОЖИДАНИЕ"; sub = "мяч у соперника"; disabled = true;
+    }
+    const sig = state + txt + sub + disabled;
+    if(sig !== prevCtrlState){
+      prevCtrlState = sig;
+      elPassBtn.disabled = disabled;
+      elPassBtn.className = state;
+      elBtnText.innerText = txt;
+      elBtnSub.innerText = sub;
     }
   }
 
@@ -2637,7 +2638,7 @@
   });
 
   // ============ INIT ============
-  const BUILD_ID = "20260709b";
+  const BUILD_ID = "20260709c";
   try {
     const seen = sessionStorage.getItem("hotwire_build");
     if(seen !== BUILD_ID && !/[?&]v=/.test(location.search)){
