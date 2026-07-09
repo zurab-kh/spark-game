@@ -1247,19 +1247,34 @@
   // Полноэкранный режим, цвет хедера/фона TG, запрет pull-to-refresh, тактильная отдача.
   // Всё в try/catch — приложение работает и вне Telegram (браузер/превью).
   const tg = (function(){ try { return window.Telegram && window.Telegram.WebApp; } catch(e){ return null; } })();
-  function initTg(){
+  // Базовый viewport: ready + expand + цвета фона/хедера
+  function applyViewport(){
     if(!tg) return;
-    document.body.classList.add("tg-fullscreen");
     try { tg.ready(); } catch(e){}
-    // expand часто не срабатывает с первого раза — повторяем с задержками
-    const doExpand = () => { try { tg.expand(); } catch(e){} };
-    doExpand();
-    setTimeout(doExpand, 300);
-    setTimeout(doExpand, 800);
-    setTimeout(doExpand, 1500);
+    try { tg.expand(); } catch(e){}
     try { if(tg.disableVerticalSwipes) tg.disableVerticalSwipes(); } catch(e){}
     try { if(tg.setHeaderColor) tg.setHeaderColor("#060810"); } catch(e){}
     try { if(tg.setBackgroundColor) tg.setBackgroundColor("#060810"); } catch(e){}
+  }
+  // requestFullscreen (TG 8.0+) — полностью прячет нативный хедер Telegram.
+  // WebView не сразу готов принять запрос → вызываем поэтапно.
+  function requestFullscreenSafe(){
+    if(!tg) return;
+    try { if(typeof tg.isVersionAtLeast === "function" && !tg.isVersionAtLeast("8.0")) return; } catch(e){ return; }
+    try { if(tg.isFullscreen) return; } catch(e){}
+    try { if(typeof tg.requestFullscreen === "function") tg.requestFullscreen(); } catch(e){}
+  }
+  function initTg(){
+    if(!tg) return;
+    document.body.classList.add("tg-fullscreen");
+    applyViewport();
+    syncViewportHeight();
+    // Fullscreen нужно запрашивать с задержкой — сразу не сработает
+    window.requestAnimationFrame(() => { applyViewport(); requestFullscreenSafe(); });
+    // И ещё раз через 400мс — страховка на медленных устройствах
+    window.setTimeout(() => { applyViewport(); requestFullscreenSafe(); }, 400);
+    // Дополнительная страховка для expand на старых клиентах
+    window.setTimeout(() => { try { tg.expand(); } catch(e){} }, 1500);
   }
   // Тактильная отдача. type: light|medium|heavy|error|success|warning|select
   function haptic(type){
@@ -2738,7 +2753,7 @@
   });
 
   // ============ INIT ============
-  const BUILD_ID = "20260709h";
+  const BUILD_ID = "20260710a";
   try {
     const seen = sessionStorage.getItem("hotwire_build");
     if(seen !== BUILD_ID && !/[?&]v=/.test(location.search)){
@@ -2749,10 +2764,9 @@
 
   loadMpLogs();
   mpLog("app:init", { ua: navigator.userAgent.slice(0, 80), signal: SIGNAL_URL });
-  // Telegram: fullscreen, цвета, тактильность. Регистрируем слушатель высоты вьюпорта.
+  // Telegram: true fullscreen (8.0+), цвета, тактильность. Слушатели высоты вьюпорта.
   initTg();
-  syncViewportHeight();
-  try { if(tg && tg.onEvent) tg.onEvent("viewportChanged", syncViewportHeight); } catch(e){}
+  try { if(tg && tg.onEvent){ tg.onEvent("viewportChanged", syncViewportHeight); tg.onEvent("fullscreenChanged", syncViewportHeight); } } catch(e){}
   window.addEventListener("resize", syncViewportHeight);
   window.addEventListener("orientationchange", ()=> setTimeout(syncViewportHeight, 300));
   load();
