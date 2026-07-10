@@ -64,8 +64,8 @@
     --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
-  /* на интро шапка скрыта — splash на весь экран */
-  body.on-intro .header, body.on-intro .trust-strip { display: none; }
+  /* на интро шапка и игровая зона скрыты — splash на весь экран */
+  body.on-intro .header, body.on-intro .trust-strip, body.on-intro .arena, body.on-intro .controls { display: none; }
   body.on-intro #app { background: radial-gradient(circle at 50% 35%, #1a1410 0%, var(--void) 75%); }
 
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -2767,7 +2767,7 @@
   });
 
   // ============ INIT ============
-  const BUILD_ID = "20260710i";
+  const BUILD_ID = "20260710j";
   try {
     const seen = sessionStorage.getItem("hotwire_build");
     if(seen !== BUILD_ID && !/[?&]v=/.test(location.search)){
