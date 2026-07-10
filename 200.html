@@ -44,7 +44,7 @@
     --glitch: 'Sora', sans-serif;
     --header-h: 56px;
     --strip-h: 24px;
-    --tg-close-reserve: 52px;
+    --tg-close-reserve: 64px;
     --chrome-top: calc(max(13px, env(safe-area-inset-top)) + var(--header-h) + var(--strip-h));
     --spark-size: clamp(64px, 17vw, 86px);
     --spark-half: calc(var(--spark-size) / 2);
@@ -913,6 +913,17 @@
 </style>
 </head>
 <body class="on-intro loading">
+
+<!-- PRELOADER: жёстко перекрывает весь экран пока JS не загрузится.
+     Убирается из JS в самом конце INIT. -->
+<div id="preloader" style="position:fixed;inset:0;z-index:99999;background:#060810;display:flex;align-items:center;justify-content:center;">
+  <svg width="64" height="64" viewBox="0 0 64 64" style="animation:plspin 1s linear infinite;">
+    <circle cx="32" cy="38" r="22" fill="#1a1410" stroke="#ff6b1a" stroke-width="2" opacity="0.4"/>
+    <path d="M32 16 Q34 12 32 8" fill="none" stroke="#52525b" stroke-width="2"/>
+    <circle cx="32" cy="8" r="3" fill="#fbbf24"/>
+  </svg>
+</div>
+<style>@keyframes plspin{from{transform:rotate(0)}to{transform:rotate(360deg)}}</style>
 
 <!-- inline logo SVG: ball-bomb with a lit fuse (the "spark") -->
 <svg width="0" height="0" style="position:absolute"><defs>
@@ -2767,7 +2778,7 @@
   });
 
   // ============ INIT ============
-  const BUILD_ID = "20260710j";
+  const BUILD_ID = "20260710k";
   try {
     const seen = sessionStorage.getItem("hotwire_build");
     if(seen !== BUILD_ID && !/[?&]v=/.test(location.search)){
@@ -2793,8 +2804,12 @@
   renderLobby();
   renderStakes();
   showScreen("introScreen");
-  // intro показан — включаем анимации для последующих переходов
-  requestAnimationFrame(() => document.body.classList.remove("loading"));
+  // intro показан — убираем preloader и включаем анимации переходов
+  requestAnimationFrame(() => {
+    const pl = $("preloader");
+    if(pl){ pl.style.opacity = "0"; pl.style.transition = "opacity .2s"; setTimeout(()=>pl.remove(), 250); }
+    document.body.classList.remove("loading");
+  });
 })();
 </script>
 </body>
