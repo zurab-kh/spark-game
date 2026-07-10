@@ -79,9 +79,8 @@
   .app-container {
     width: 100%; max-width: 480px;
     height: calc(var(--app-h) - var(--tg-close-reserve));
-    margin-top: var(--tg-close-reserve);
     display: flex; flex-direction: column;
-    margin: 0 auto; position: relative;
+    margin: var(--tg-close-reserve) auto 0; position: relative;
     background:
       radial-gradient(ellipse 120% 50% at 50% 0%, rgba(255,107,26,.10) 0%, transparent 55%),
       radial-gradient(ellipse 80% 40% at 50% 100%, rgba(168,85,247,.04) 0%, transparent 50%),
@@ -2768,7 +2767,7 @@
   });
 
   // ============ INIT ============
-  const BUILD_ID = "20260710e";
+  const BUILD_ID = "20260710f";
   try {
     const seen = sessionStorage.getItem("hotwire_build");
     if(seen !== BUILD_ID && !/[?&]v=/.test(location.search)){
