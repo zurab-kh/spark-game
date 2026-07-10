@@ -45,7 +45,7 @@
     --header-h: 56px;
     --strip-h: 24px;
     --tg-close-reserve: 0px;
-    --chrome-top: calc(max(13px, env(safe-area-inset-top)) + var(--tg-close-reserve) + var(--header-h) + var(--strip-h));
+    --chrome-top: calc(max(13px, env(safe-area-inset-top)) + var(--header-h) + var(--strip-h));
     --spark-size: clamp(64px, 17vw, 86px);
     --spark-half: calc(var(--spark-size) / 2);
     --wire-top: 58%;
@@ -77,7 +77,10 @@
   }
 
   .app-container {
-    width: 100%; max-width: 480px; height: var(--app-h); min-height: var(--app-h); display: flex; flex-direction: column;
+    width: 100%; max-width: 480px;
+    height: calc(var(--app-h) - var(--tg-close-reserve));
+    margin-top: var(--tg-close-reserve);
+    display: flex; flex-direction: column;
     margin: 0 auto; position: relative;
     background:
       radial-gradient(ellipse 120% 50% at 50% 0%, rgba(255,107,26,.10) 0%, transparent 55%),
@@ -89,7 +92,7 @@
 
   /* ===== HEADER ===== */
   .header {
-    padding: calc(max(13px, env(safe-area-inset-top)) + var(--tg-close-reserve)) 16px 12px;
+    padding: max(13px, env(safe-area-inset-top)) 16px 12px;
     display: flex; justify-content: space-between; align-items: center;
     border-bottom: 1px solid var(--border); background: rgba(6,8,16,0.85); backdrop-filter: blur(16px);
     z-index: 100; position: relative;
@@ -804,7 +807,7 @@
       border-radius: 16px;
       box-shadow: 0 0 0 1px var(--border), 0 20px 70px rgba(0,0,0,.5);
     }
-    body.tg-fullscreen .app-container { height: var(--app-h); border-radius: 0; box-shadow: none; }
+    body.tg-fullscreen .app-container { height: calc(var(--app-h) - var(--tg-close-reserve)); margin-top: var(--tg-close-reserve); border-radius: 0; box-shadow: none; }
     .lobby-hero .play-hit .play-big { font-size: 28px; padding: 20px; }
     .match-wrap { max-width: 380px; }
     .mp-room-code { font-size: 54px; }
@@ -815,7 +818,7 @@
   @media (min-width: 768px) {
     :root { --overlay-max: 460px; }
     .app-container { max-width: 560px; height: min(var(--app-h), 880px); min-height: 0; }
-    body.tg-fullscreen .app-container { height: var(--app-h); }
+    body.tg-fullscreen .app-container { height: calc(var(--app-h) - var(--tg-close-reserve)); margin-top: var(--tg-close-reserve); }
     .zone-charge { font-size: 28px; }
     .intro-wrap { max-width: 420px; }
   }
@@ -867,7 +870,7 @@
       border-radius: 18px;
       box-shadow: 0 0 0 1px var(--border), 0 28px 90px rgba(0,0,0,.55);
     }
-    body.tg-fullscreen .app-container { height: var(--app-h); border-radius: 0; box-shadow: none; margin: 0; }
+    body.tg-fullscreen .app-container { height: calc(var(--app-h) - var(--tg-close-reserve)); margin-top: var(--tg-close-reserve); border-radius: 0; box-shadow: none; }
   }
 
   /* ——— Large monitors (27–32") ——— */
@@ -878,14 +881,14 @@
       max-width: 620px; height: min(var(--app-h), 980px); min-height: 0; border-radius: 22px;
       box-shadow: 0 0 0 1px rgba(58,58,68,.8), 0 40px 120px rgba(0,0,0,.7), 0 0 80px rgba(255,107,26,.04);
     }
-    body.tg-fullscreen .app-container { height: var(--app-h); border-radius: 0; box-shadow: none; }
+    body.tg-fullscreen .app-container { height: calc(var(--app-h) - var(--tg-close-reserve)); margin-top: var(--tg-close-reserve); border-radius: 0; box-shadow: none; }
     .mcard { max-width: 440px; }
   }
 
   @media (min-width: 1920px) {
     :root { --overlay-max: 480px; }
     .app-container { max-width: 660px; height: min(var(--app-h), 1020px); min-height: 0; }
-    body.tg-fullscreen .app-container { height: var(--app-h); }
+    body.tg-fullscreen .app-container { height: calc(var(--app-h) - var(--tg-close-reserve)); margin-top: var(--tg-close-reserve); }
     .brand { font-size: 28px; }
     .logo-svg { width: 34px; height: 34px; }
     .balance { font-size: 18px; }
@@ -897,7 +900,7 @@
       max-width: 700px; height: min(var(--app-h), 1080px); min-height: 0; border-radius: 24px;
       box-shadow: 0 0 0 1px var(--border2), 0 48px 140px rgba(0,0,0,.75), 0 0 100px rgba(255,107,26,.05);
     }
-    body.tg-fullscreen .app-container { height: var(--app-h); border-radius: 0; box-shadow: none; }
+    body.tg-fullscreen .app-container { height: calc(var(--app-h) - var(--tg-close-reserve)); margin-top: var(--tg-close-reserve); border-radius: 0; box-shadow: none; }
     .menu-wrap, .intro-wrap, .match-wrap, .result-wrap { max-width: 500px; }
     .mcard { max-width: 460px; }
   }
@@ -1266,26 +1269,13 @@
     try { if(typeof tg.requestFullscreen === "function") tg.requestFullscreen(); } catch(e){}
   }
   // В fullscreen Telegram рисует плавающую кнопку «закрыть» в правом верхнем углу.
-  // Резервируем под неё место (--tg-close-reserve), чтобы header и экраны не уезжали под неё.
+  // Резервируем под неё место через margin-top на app-container (сдвигает ВСЁ:
+  // header, экраны, арену), чтобы ничего не уезжало под кнопку.
   function updateFullscreenReserve(){
     let fs = false;
     try { fs = !!(tg && tg.isFullscreen); } catch(e){}
-    // В любом TG-режиме (expand или fullscreen) нужен отступ сверху под нативные элементы.
-    // isFullscreen может lag'ать — поэтому ориентируемся на наличие tg вообще.
-    const needReserve = !!tg;
-    const reserve = needReserve ? (fs ? "44px" : "38px") : "0px";
-    document.documentElement.style.setProperty("--tg-close-reserve", reserve);
+    document.documentElement.style.setProperty("--tg-close-reserve", fs ? "44px" : "0px");
     syncViewportHeight();
-    dbg("reserve=" + reserve + " fs=" + fs + " vh=" + (tg && tg.viewportStableHeight));
-  }
-  // Временный debug-индикатор состояния TG (правый верхний угол). Убирается после диагностики.
-  let _dbgEl;
-  function dbg(msg){
-    if(!_dbgEl){ _dbgEl = document.createElement("div"); _dbgEl.id = "_dbg";
-      _dbgEl.style.cssText = "position:fixed;top:2px;right:4px;z-index:9999;font:10px/1.3 monospace;background:rgba(0,0,0,.8);color:#0f0;padding:3px 5px;border-radius:4px;pointer-events:none;max-width:50vw;";
-      document.body.appendChild(_dbgEl);
-    }
-    _dbgEl.textContent = msg;
   }
   function initTg(){
     if(!tg) return;
@@ -1317,15 +1307,6 @@
     if(tg && tg.viewportStableHeight) h = tg.viewportStableHeight;
     if(!h) h = window.innerHeight;
     document.documentElement.style.setProperty("--app-h", h + "px");
-    dbg2("vsh=" + (tg&&tg.viewportStableHeight) + " ih=" + window.innerHeight + " set=" + Math.round(h) + " fs=" + (tg&&tg.isFullscreen));
-  }
-  let _dbgEl2;
-  function dbg2(msg){
-    if(!_dbgEl2){ _dbgEl2 = document.createElement("div"); _dbgEl2.id = "_dbg2";
-      _dbgEl2.style.cssText = "position:fixed;bottom:2px;left:2px;z-index:9999;font:12px/1.3 monospace;background:rgba(0,0,0,.9);color:#0ff;padding:4px 6px;border-radius:4px;pointer-events:none;max-width:95vw;";
-      document.body.appendChild(_dbgEl2);
-    }
-    _dbgEl2.textContent = msg;
   }
 
   // ============ CONFIG ============
@@ -2787,7 +2768,7 @@
   });
 
   // ============ INIT ============
-  const BUILD_ID = "20260710d";
+  const BUILD_ID = "20260710e";
   try {
     const seen = sessionStorage.getItem("hotwire_build");
     if(seen !== BUILD_ID && !/[?&]v=/.test(location.search)){
