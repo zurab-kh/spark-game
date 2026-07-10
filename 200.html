@@ -2868,10 +2868,18 @@
   });
 
   // ============ INIT ============
-  const BUILD_ID = "20260711b";
-  // Cache-bust через location.replace убран — он вызывал мелькание при загрузке
-  // (intro → лобби → intro при перезагрузке). Вместо этого полагаемся на
-  // Cache-Control meta + Telegram CDN cache-bust через BuildHash в URL ссылки в @BotFather.
+  const BUILD_ID = "20260711c";
+  // Cache-bust: Telegram кэширует страницу до 10 минут (max-age=600).
+  // Принудительно перезагружаем с актуальным ?v=BUILD_ID. Мелькания больше нет —
+  // lobbyIn анимация (реальная причина flash) удалена, а return прерывает INIT
+  // до перезагрузки, так что старый код не успевает отрисовать экраны.
+  try {
+    const urlV = new URLSearchParams(location.search).get("v");
+    if(urlV !== BUILD_ID){
+      location.replace(location.pathname + "?v=" + BUILD_ID + location.hash);
+      return;
+    }
+  } catch(e){}
 
   loadMpLogs();
   mpLog("app:init", { ua: navigator.userAgent.slice(0, 80), signal: SIGNAL_URL });
