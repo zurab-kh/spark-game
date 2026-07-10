@@ -74,13 +74,15 @@
     background-color: var(--void); color: var(--ink);
     font-family: 'Inter', sans-serif; overflow: hidden; user-select: none;
     display: flex; justify-content: center;
+    padding-top: var(--tg-close-reserve);
+    box-sizing: border-box;
   }
 
   .app-container {
     width: 100%; max-width: 480px;
     height: calc(var(--app-h) - var(--tg-close-reserve));
     display: flex; flex-direction: column;
-    margin: var(--tg-close-reserve) auto 0; position: relative;
+    margin: 0 auto; position: relative;
     background:
       radial-gradient(ellipse 120% 50% at 50% 0%, rgba(255,107,26,.10) 0%, transparent 55%),
       radial-gradient(ellipse 80% 40% at 50% 100%, rgba(168,85,247,.04) 0%, transparent 50%),
@@ -1680,7 +1682,20 @@
 
   // ============ SCREENS ============
   function showScreen(id){
-    ["introScreen","menuScreen","resultScreen","matchScreen"].forEach(s => $(s).classList.toggle("visible", s === id));
+    ["introScreen","menuScreen","resultScreen","matchScreen"].forEach(s => {
+      const el = $(s);
+      const becomingVisible = (s === id);
+      if(!becomingVisible && el.classList.contains("visible")){
+        // уходящий экран исчезает мгновенно (без transition), иначе он
+        // полупрозрачен .35с и сквозь него проступает подложка арены
+        el.style.transition = "none";
+        el.classList.remove("visible");
+        // восстановим transition на следующем кадре
+        requestAnimationFrame(() => { el.style.transition = ""; });
+      } else {
+        el.classList.toggle("visible", becomingVisible);
+      }
+    });
     document.body.classList.toggle("on-intro", id === "introScreen");
     elApp.classList.remove("shake-heavy","once");
     if(id !== null){
@@ -2778,7 +2793,7 @@
   });
 
   // ============ INIT ============
-  const BUILD_ID = "20260710k";
+  const BUILD_ID = "20260710l";
   try {
     const seen = sessionStorage.getItem("hotwire_build");
     if(seen !== BUILD_ID && !/[?&]v=/.test(location.search)){
