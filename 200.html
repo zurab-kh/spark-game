@@ -44,7 +44,7 @@
     --glitch: 'Sora', sans-serif;
     --header-h: 56px;
     --strip-h: 24px;
-    --tg-close-reserve: 0px;
+    --tg-close-reserve: 52px;
     --chrome-top: calc(max(13px, env(safe-area-inset-top)) + var(--header-h) + var(--strip-h));
     --spark-size: clamp(64px, 17vw, 86px);
     --spark-half: calc(var(--spark-size) / 2);
@@ -1271,22 +1271,7 @@
   // Резервируем под неё место через margin-top на app-container (сдвигает ВСЁ:
   // header, экраны, арену), чтобы ничего не уезжало под кнопку.
   function updateFullscreenReserve(){
-    let fs = false;
-    try { fs = !!(tg && tg.isFullscreen); } catch(e){}
-    // принудительно ставим reserve в любом TG-режиме, не только fullscreen
-    const reserve = tg ? "52px" : "0px";
-    document.documentElement.style.setProperty("--tg-close-reserve", reserve);
-    syncViewportHeight();
-    _dbg("fs=" + fs + " reserve=" + reserve + " tg=" + !!tg);
-  }
-  // debug
-  let _dbgEl;
-  function _dbg(msg){
-    if(!_dbgEl){ _dbgEl = document.createElement("div");
-      _dbgEl.style.cssText = "position:fixed;top:0;left:0;z-index:99999;font:bold 14px/1.4 monospace;background:red;color:#fff;padding:6px 10px;pointer-events:none;max-width:100vw;";
-      document.body.appendChild(_dbgEl);
-    }
-    _dbgEl.textContent = msg;
+    document.documentElement.style.setProperty("--tg-close-reserve", "52px");
   }
   function initTg(){
     if(!tg) return;
@@ -1294,11 +1279,9 @@
     applyViewport();
     updateFullscreenReserve();
     // Fullscreen нужно запрашивать с задержкой — сразу не сработает
-    window.requestAnimationFrame(() => { applyViewport(); requestFullscreenSafe(); updateFullscreenReserve(); });
+    window.requestAnimationFrame(() => { applyViewport(); requestFullscreenSafe(); });
     // И ещё раз через 400мс — страховка на медленных устройствах
-    window.setTimeout(() => { applyViewport(); requestFullscreenSafe(); updateFullscreenReserve(); }, 400);
-    // И ещё через 1200мс — финальная проверка резерва под кнопку закрыть
-    window.setTimeout(() => { updateFullscreenReserve(); }, 1200);
+    window.setTimeout(() => { applyViewport(); requestFullscreenSafe(); }, 400);
     // Дополнительная страховка для expand на старых клиентах
     window.setTimeout(() => { try { tg.expand(); } catch(e){} }, 1500);
   }
@@ -2779,7 +2762,7 @@
   });
 
   // ============ INIT ============
-  const BUILD_ID = "20260710g";
+  const BUILD_ID = "20260710h";
   try {
     const seen = sessionStorage.getItem("hotwire_build");
     if(seen !== BUILD_ID && !/[?&]v=/.test(location.search)){
