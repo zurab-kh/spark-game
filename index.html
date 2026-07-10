@@ -1273,8 +1273,20 @@
   function updateFullscreenReserve(){
     let fs = false;
     try { fs = !!(tg && tg.isFullscreen); } catch(e){}
-    document.documentElement.style.setProperty("--tg-close-reserve", fs ? "44px" : "0px");
+    // принудительно ставим reserve в любом TG-режиме, не только fullscreen
+    const reserve = tg ? "52px" : "0px";
+    document.documentElement.style.setProperty("--tg-close-reserve", reserve);
     syncViewportHeight();
+    _dbg("fs=" + fs + " reserve=" + reserve + " tg=" + !!tg);
+  }
+  // debug
+  let _dbgEl;
+  function _dbg(msg){
+    if(!_dbgEl){ _dbgEl = document.createElement("div");
+      _dbgEl.style.cssText = "position:fixed;top:0;left:0;z-index:99999;font:bold 14px/1.4 monospace;background:red;color:#fff;padding:6px 10px;pointer-events:none;max-width:100vw;";
+      document.body.appendChild(_dbgEl);
+    }
+    _dbgEl.textContent = msg;
   }
   function initTg(){
     if(!tg) return;
@@ -2767,7 +2779,7 @@
   });
 
   // ============ INIT ============
-  const BUILD_ID = "20260710f";
+  const BUILD_ID = "20260710g";
   try {
     const seen = sessionStorage.getItem("hotwire_build");
     if(seen !== BUILD_ID && !/[?&]v=/.test(location.search)){
