@@ -916,17 +916,6 @@
 </head>
 <body class="on-intro loading">
 
-<!-- PRELOADER: жёстко перекрывает весь экран пока JS не загрузится.
-     Убирается из JS в самом конце INIT. -->
-<div id="preloader" style="position:fixed;inset:0;z-index:99999;background:#060810;display:flex;align-items:center;justify-content:center;">
-  <svg width="64" height="64" viewBox="0 0 64 64" style="animation:plspin 1s linear infinite;">
-    <circle cx="32" cy="38" r="22" fill="#1a1410" stroke="#ff6b1a" stroke-width="2" opacity="0.4"/>
-    <path d="M32 16 Q34 12 32 8" fill="none" stroke="#52525b" stroke-width="2"/>
-    <circle cx="32" cy="8" r="3" fill="#fbbf24"/>
-  </svg>
-</div>
-<style>@keyframes plspin{from{transform:rotate(0)}to{transform:rotate(360deg)}}</style>
-
 <!-- inline logo SVG: ball-bomb with a lit fuse (the "spark") -->
 <svg width="0" height="0" style="position:absolute"><defs>
   <linearGradient id="lg" x1="0" y1="0" x2="0" y2="1">
@@ -2793,12 +2782,15 @@
   });
 
   // ============ INIT ============
-  const BUILD_ID = "20260710l";
+  const BUILD_ID = "20260710m";
   try {
-    const seen = sessionStorage.getItem("hotwire_build");
-    if(seen !== BUILD_ID && !/[?&]v=/.test(location.search)){
+    // cache-bust: перезагружаем с актуальным ?v=BUILD_ID.
+    // Проверяем ЗНАЧЕНИЕ v, а не его наличие — иначе застреваем на старой версии.
+    const urlV = new URLSearchParams(location.search).get("v");
+    if(urlV !== BUILD_ID){
       sessionStorage.setItem("hotwire_build", BUILD_ID);
       location.replace(location.pathname + "?v=" + BUILD_ID + location.hash);
+      return; // прерываем INIT — страница сейчас перезагрузится
     }
   } catch(e){}
 
@@ -2819,12 +2811,8 @@
   renderLobby();
   renderStakes();
   showScreen("introScreen");
-  // intro показан — убираем preloader и включаем анимации переходов
-  requestAnimationFrame(() => {
-    const pl = $("preloader");
-    if(pl){ pl.style.opacity = "0"; pl.style.transition = "opacity .2s"; setTimeout(()=>pl.remove(), 250); }
-    document.body.classList.remove("loading");
-  });
+  // intro показан — включаем анимации для последующих переходов
+  requestAnimationFrame(() => document.body.classList.remove("loading"));
 })();
 </script>
 </body>
