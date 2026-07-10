@@ -221,13 +221,18 @@
   .btn-sub { font-family: var(--mono); font-size: clamp(10px, 3vw, 13px); letter-spacing: 0; opacity: 0.85; margin-top: 4px; text-transform: none; }
 
   /* ===== SCREENS (full overlays) ===== */
+  /* body.loading — блокирует transition/screen-анимации до полной загрузки,
+     чтобы стартовый intro не мелькал полупрозрачным поверх подложки. */
+  body.loading .screen { transition: none !important; }
   .screen {
     position: absolute; left: 0; right: 0; bottom: 0; top: 0;
     background: rgba(8,8,10,0.96); backdrop-filter: blur(8px);
     display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 50;
     padding: var(--chrome-top) max(16px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
     text-align: center;
-    opacity: 0; transform: scale(1.02); pointer-events: none; transition: opacity .35s var(--ease-out), transform .35s var(--ease-out);
+    opacity: 0; transform: scale(1.02); pointer-events: none;
+    transition: opacity .35s var(--ease-out), transform .35s var(--ease-out);
+    overflow-x: hidden; overflow-y: auto; -webkit-overflow-scrolling: touch;
     overflow-x: hidden; overflow-y: auto; -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
     isolation: isolate;
@@ -907,7 +912,7 @@
   @media (prefers-reduced-motion: reduce) { * { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
 </style>
 </head>
-<body class="on-intro">
+<body class="on-intro loading">
 
 <!-- inline logo SVG: ball-bomb with a lit fuse (the "spark") -->
 <svg width="0" height="0" style="position:absolute"><defs>
@@ -2762,7 +2767,7 @@
   });
 
   // ============ INIT ============
-  const BUILD_ID = "20260710h";
+  const BUILD_ID = "20260710i";
   try {
     const seen = sessionStorage.getItem("hotwire_build");
     if(seen !== BUILD_ID && !/[?&]v=/.test(location.search)){
@@ -2788,6 +2793,8 @@
   renderLobby();
   renderStakes();
   showScreen("introScreen");
+  // intro показан — включаем анимации для последующих переходов
+  requestAnimationFrame(() => document.body.classList.remove("loading"));
 })();
 </script>
 </body>
