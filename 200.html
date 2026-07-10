@@ -289,9 +289,69 @@
     width: 100%; max-width: var(--overlay-max); margin: 0 auto;
   }
   .menu-wrap {
-    display: flex; flex-direction: column; gap: 12px;
+    display: flex; flex-direction: column; gap: 14px;
     padding: 4px 0 max(8px, env(safe-area-inset-bottom));
   }
+
+  /* верхняя панель: онлайн + статистика */
+  .lobby-topbar {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  }
+  .lobby-topbar .online-bar { justify-content: flex-start; }
+  .lobby-topbar .lobby-stats-strip {
+    flex: 1; max-width: 240px; padding-bottom: 0; margin-bottom: 0; border-bottom: none; gap: 2px;
+  }
+  .lobby-topbar .lobby-stats-strip .stat .v { font-size: 14px; }
+  .lobby-topbar .lobby-stats-strip .stat .k { font-size: 8px; margin-top: 2px; }
+
+  /* потенциал выигрыша — главный фокус */
+  .lobby-pot {
+    text-align: center; padding: 24px 20px; border-radius: 24px;
+    background: linear-gradient(165deg, rgba(255,107,26,.10) 0%, rgba(10,14,26,.6) 55%, rgba(6,8,16,.9) 100%);
+    border: 1px solid rgba(255,107,26,.18);
+    box-shadow: 0 16px 50px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.05);
+    backdrop-filter: blur(10px); position: relative; overflow: hidden;
+  }
+  .lobby-pot::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--spark), var(--violet), transparent); opacity: .7;
+  }
+  .lobby-pot-label {
+    font-family: var(--mono); font-size: 10px; letter-spacing: .18em; text-transform: uppercase;
+    color: var(--dim); font-weight: 700;
+  }
+  .lobby-pot-amount {
+    font-family: var(--display); font-size: clamp(48px, 14vw, 64px); font-weight: 800; line-height: 1.1;
+    background: linear-gradient(135deg, var(--spark-bright), var(--spark), #c2410c);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    margin: 6px 0 4px; font-variant-numeric: tabular-nums;
+  }
+  .lobby-pot-amount .u { font-family: var(--mono); font-size: clamp(16px, 4vw, 20px); color: var(--mut); -webkit-text-fill-color: var(--mut); margin-left: 6px; font-weight: 700; }
+  .lobby-pot-sub { font-family: var(--mono); font-size: 11px; color: var(--dim); line-height: 1.5; }
+  .lobby-pot-sub b { color: var(--spark-2); }
+
+  /* выбор ставки */
+  .lobby-stake-label, .lobby-stake-head .lab-inline {
+    font-family: var(--mono); font-size: 10px; letter-spacing: .18em; text-transform: uppercase;
+    color: var(--dim); font-weight: 700; margin-bottom: 10px; display: block;
+  }
+
+  /* вызвать друга — широкая кнопка-полоса */
+  .friend-cta {
+    width: 100%; display: flex; align-items: center; gap: 12px; padding: 16px 18px;
+    border-radius: 16px; cursor: pointer; border: 1px solid rgba(168,85,247,.28);
+    background: rgba(168,85,247,.06); backdrop-filter: blur(6px); transition: transform .1s, background .15s;
+    font-family: var(--display); font-size: 17px; font-weight: 700; letter-spacing: .5px; color: #c4b5fd;
+  }
+  .friend-cta:active { transform: scale(.98); background: rgba(168,85,247,.12); }
+  .friend-icon { font-size: 20px; }
+  .friend-text { flex: 1; text-align: left; }
+  .friend-arrow { opacity: .5; font-size: 18px; }
+
+  /* недавние */
+  .lobby-recent { }
+  .lobby-recent-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .lobby-recent-more { background: none; border: none; color: var(--spark); cursor: pointer; font-family: var(--mono); font-size: 11px; font-weight: 700; padding: 0; }
 
   /* индикатор онлайна */
   .online-bar {
@@ -1041,57 +1101,63 @@
     </div>
   </div>
 
-  <!-- MENU -->
+  <!-- MENU v2 -->
   <div class="screen menu-screen" id="menuScreen">
     <div class="menu-wrap">
-      <!-- индикатор онлайна -->
-      <div class="online-bar">
-        <span class="online-dot"></span><span id="onlineCount">…</span> игроков онлайн
-      </div>
 
-      <article class="lobby-hero">
-        <!-- компактная статистика в одну строку -->
+      <!-- верх: онлайн + статистика -->
+      <div class="lobby-topbar">
+        <div class="online-bar">
+          <span class="online-dot"></span><span id="onlineCount">…</span> онлайн
+        </div>
         <div class="lobby-stats-strip">
           <div class="stat"><div class="v" id="lobbyWL">0–0</div><div class="k">П–П</div></div>
           <div class="stat"><div class="v fire" id="lobbyStreak">0</div><div class="k">СЕРИЯ</div></div>
           <div class="stat"><div class="v" id="lobbyDuels">0</div><div class="k">ДУЭЛИ</div></div>
           <div class="stat"><div class="v pl-pos" id="lobbyNet">+0.00</div><div class="k">ПРОФИТ</div></div>
         </div>
+      </div>
 
-        <!-- выбор ставки + предпросмотр банка — единый блок -->
-        <div class="lobby-stake">
-          <div class="lobby-stake-head">
-            <span class="lab-inline">Ставка</span>
-            <div class="pot-preview" id="potPreview">Банк <b>100 USDT</b> · выигрыш <b>~95</b></div>
-          </div>
-          <div class="chips" id="stakeChips"></div>
-        </div>
+      <!-- потенциал выигрыша — крупный фокус -->
+      <div class="lobby-pot">
+        <div class="lobby-pot-label">ТЫ МОЖЕШЬ ВЫИГРАТЬ</div>
+        <div class="lobby-pot-amount" id="potPreview">95<span class="u">USDT</span></div>
+        <div class="lobby-pot-sub">ставка <b id="playAmtAi">50</b> · банк удвоится · комиссия 5%</div>
+      </div>
 
-        <!-- огромная неоновая кнопка ИГРАТЬ -->
-        <div class="play-hit" id="playAiWrap">
-          <button class="play-big" id="playAiBtn">▶ ИГРАТЬ <span class="amt" id="playAmtAi">50 USDT</span></button>
-        </div>
-        <button class="play-big" id="playBtn" style="display:none;">▶ НАЧАТЬ ДУЭЛЬ <span class="amt" id="playAmt">50 USDT</span></button>
-        <button type="button" class="play-secondary" id="friendBtn">ВЫЗВАТЬ ДРУГА</button>
-        <div class="conn-badge" id="connBadge">● Связь установлена — хост начинает дуэль</div>
-      </article>
+      <!-- выбор ставки — большие плитки -->
+      <div class="lobby-stake">
+        <div class="lobby-stake-label">ВЫБЕРИ СТАВКУ</div>
+        <div class="chips" id="stakeChips"></div>
+      </div>
 
-      <!-- недавние дуэли + быстрые правила рядом -->
-      <div class="lobby-bottom-grid">
-        <div class="lobby-recent-inset">
-          <div class="lobby-recent-label">Недавние</div>
-          <div class="lobby-recent-feed" id="lobbyRecentFeed">
-            <div class="lobby-recent-empty">Дуэлей пока нет — жми ИГРАТЬ</div>
-          </div>
+      <!-- гигантская кнопка -->
+      <div class="play-hit" id="playAiWrap">
+        <button class="play-big" id="playAiBtn">ИГРАТЬ <span class="amt">▶</span></button>
+      </div>
+      <button class="play-big" id="playBtn" style="display:none;">НАЧАТЬ ДУЭЛЬ <span class="amt" id="playAmt">50 USDT</span></button>
+      <div class="conn-badge" id="connBadge">● Связь установлена — хост начинает дуэль</div>
+
+      <!-- вызвать друга -->
+      <button type="button" class="friend-cta" id="friendBtn">
+        <span class="friend-icon">⚡</span>
+        <span class="friend-text">ВЫЗВАТЬ ДРУГА</span>
+        <span class="friend-arrow">→</span>
+      </button>
+
+      <!-- недавние дуэли -->
+      <div class="lobby-recent">
+        <div class="lobby-recent-head">
+          <span class="lobby-recent-label">Недавние дуэли</span>
+          <button type="button" id="historyBtn" class="lobby-recent-more">всё →</button>
         </div>
-        <div class="lobby-tip-card">
-          <div class="lobby-recent-label">Как выиграть</div>
-          <div class="lobby-tip-body">Держи мяч дольше — заберёшь <b class="c-g">больше</b> банка. Но не дай НАГРЕВу дойти до точки взрыва. Передай вовремя!</div>
+        <div class="lobby-recent-feed" id="lobbyRecentFeed">
+          <div class="lobby-recent-empty">Дуэлей пока нет — жми ИГРАТЬ</div>
         </div>
       </div>
 
+      <!-- нижние pills -->
       <nav class="menu-pills">
-        <button type="button" id="historyBtn">История</button>
         <button type="button" id="rulesBtn">Правила</button>
         <button type="button" id="fairnessBtn">Честность</button>
         <button type="button" class="pill-warn" id="resetBtn">Сброс</button>
@@ -1564,7 +1630,7 @@
     const pot = uiStake * 2;
     const win = pot * (1 - RAKE);
     const el = $("potPreview");
-    if(el) el.innerHTML = `Банк <b>${fmt(pot)}</b> · выигрыш <b>~${fmt(win)}</b>`;
+    if(el) el.innerHTML = fmt(win) + '<span class="u">USDT</span>';
   }
   function updatePlayButtons(){
     const hostReady = mode === "friend" && mpConnected && role === "host";
@@ -2802,7 +2868,7 @@
   });
 
   // ============ INIT ============
-  const BUILD_ID = "20260711a";
+  const BUILD_ID = "20260711b";
   // Cache-bust через location.replace убран — он вызывал мелькание при загрузке
   // (intro → лобби → intro при перезагрузке). Вместо этого полагаемся на
   // Cache-Control meta + Telegram CDN cache-bust через BuildHash в URL ссылки в @BotFather.
