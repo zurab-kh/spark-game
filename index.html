@@ -1270,8 +1270,22 @@
   function updateFullscreenReserve(){
     let fs = false;
     try { fs = !!(tg && tg.isFullscreen); } catch(e){}
-    document.documentElement.style.setProperty("--tg-close-reserve", fs ? "44px" : "0px");
+    // В любом TG-режиме (expand или fullscreen) нужен отступ сверху под нативные элементы.
+    // isFullscreen может lag'ать — поэтому ориентируемся на наличие tg вообще.
+    const needReserve = !!tg;
+    const reserve = needReserve ? (fs ? "44px" : "38px") : "0px";
+    document.documentElement.style.setProperty("--tg-close-reserve", reserve);
     syncViewportHeight();
+    dbg("reserve=" + reserve + " fs=" + fs + " vh=" + (tg && tg.viewportStableHeight));
+  }
+  // Временный debug-индикатор состояния TG (правый верхний угол). Убирается после диагностики.
+  let _dbgEl;
+  function dbg(msg){
+    if(!_dbgEl){ _dbgEl = document.createElement("div"); _dbgEl.id = "_dbg";
+      _dbgEl.style.cssText = "position:fixed;top:2px;right:4px;z-index:9999;font:10px/1.3 monospace;background:rgba(0,0,0,.8);color:#0f0;padding:3px 5px;border-radius:4px;pointer-events:none;max-width:50vw;";
+      document.body.appendChild(_dbgEl);
+    }
+    _dbgEl.textContent = msg;
   }
   function initTg(){
     if(!tg) return;
@@ -2764,7 +2778,7 @@
   });
 
   // ============ INIT ============
-  const BUILD_ID = "20260710b";
+  const BUILD_ID = "20260710c";
   try {
     const seen = sessionStorage.getItem("hotwire_build");
     if(seen !== BUILD_ID && !/[?&]v=/.test(location.search)){
