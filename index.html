@@ -1317,6 +1317,15 @@
     if(tg && tg.viewportStableHeight) h = tg.viewportStableHeight;
     if(!h) h = window.innerHeight;
     document.documentElement.style.setProperty("--app-h", h + "px");
+    dbg2("vsh=" + (tg&&tg.viewportStableHeight) + " ih=" + window.innerHeight + " set=" + Math.round(h) + " fs=" + (tg&&tg.isFullscreen));
+  }
+  let _dbgEl2;
+  function dbg2(msg){
+    if(!_dbgEl2){ _dbgEl2 = document.createElement("div"); _dbgEl2.id = "_dbg2";
+      _dbgEl2.style.cssText = "position:fixed;bottom:2px;left:2px;z-index:9999;font:12px/1.3 monospace;background:rgba(0,0,0,.9);color:#0ff;padding:4px 6px;border-radius:4px;pointer-events:none;max-width:95vw;";
+      document.body.appendChild(_dbgEl2);
+    }
+    _dbgEl2.textContent = msg;
   }
 
   // ============ CONFIG ============
@@ -2778,7 +2787,7 @@
   });
 
   // ============ INIT ============
-  const BUILD_ID = "20260710c";
+  const BUILD_ID = "20260710d";
   try {
     const seen = sessionStorage.getItem("hotwire_build");
     if(seen !== BUILD_ID && !/[?&]v=/.test(location.search)){
