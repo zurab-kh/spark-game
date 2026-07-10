@@ -44,7 +44,8 @@
     --glitch: 'Sora', sans-serif;
     --header-h: 56px;
     --strip-h: 24px;
-    --chrome-top: calc(max(13px, env(safe-area-inset-top)) + var(--header-h) + var(--strip-h));
+    --tg-close-reserve: 0px;
+    --chrome-top: calc(max(13px, env(safe-area-inset-top)) + var(--tg-close-reserve) + var(--header-h) + var(--strip-h));
     --spark-size: clamp(64px, 17vw, 86px);
     --spark-half: calc(var(--spark-size) / 2);
     --wire-top: 58%;
@@ -88,7 +89,7 @@
 
   /* ===== HEADER ===== */
   .header {
-    padding: max(13px, env(safe-area-inset-top)) 16px 12px;
+    padding: calc(max(13px, env(safe-area-inset-top)) + var(--tg-close-reserve)) 16px 12px;
     display: flex; justify-content: space-between; align-items: center;
     border-bottom: 1px solid var(--border); background: rgba(6,8,16,0.85); backdrop-filter: blur(16px);
     z-index: 100; position: relative;
@@ -1264,15 +1265,25 @@
     try { if(tg.isFullscreen) return; } catch(e){}
     try { if(typeof tg.requestFullscreen === "function") tg.requestFullscreen(); } catch(e){}
   }
+  // В fullscreen Telegram рисует плавающую кнопку «закрыть» в правом верхнем углу.
+  // Резервируем под неё место (--tg-close-reserve), чтобы header и экраны не уезжали под неё.
+  function updateFullscreenReserve(){
+    let fs = false;
+    try { fs = !!(tg && tg.isFullscreen); } catch(e){}
+    document.documentElement.style.setProperty("--tg-close-reserve", fs ? "44px" : "0px");
+    syncViewportHeight();
+  }
   function initTg(){
     if(!tg) return;
     document.body.classList.add("tg-fullscreen");
     applyViewport();
-    syncViewportHeight();
+    updateFullscreenReserve();
     // Fullscreen нужно запрашивать с задержкой — сразу не сработает
-    window.requestAnimationFrame(() => { applyViewport(); requestFullscreenSafe(); });
+    window.requestAnimationFrame(() => { applyViewport(); requestFullscreenSafe(); updateFullscreenReserve(); });
     // И ещё раз через 400мс — страховка на медленных устройствах
-    window.setTimeout(() => { applyViewport(); requestFullscreenSafe(); }, 400);
+    window.setTimeout(() => { applyViewport(); requestFullscreenSafe(); updateFullscreenReserve(); }, 400);
+    // И ещё через 1200мс — финальная проверка резерва под кнопку закрыть
+    window.setTimeout(() => { updateFullscreenReserve(); }, 1200);
     // Дополнительная страховка для expand на старых клиентах
     window.setTimeout(() => { try { tg.expand(); } catch(e){} }, 1500);
   }
@@ -2753,7 +2764,7 @@
   });
 
   // ============ INIT ============
-  const BUILD_ID = "20260710a";
+  const BUILD_ID = "20260710b";
   try {
     const seen = sessionStorage.getItem("hotwire_build");
     if(seen !== BUILD_ID && !/[?&]v=/.test(location.search)){
@@ -2766,7 +2777,10 @@
   mpLog("app:init", { ua: navigator.userAgent.slice(0, 80), signal: SIGNAL_URL });
   // Telegram: true fullscreen (8.0+), цвета, тактильность. Слушатели высоты вьюпорта.
   initTg();
-  try { if(tg && tg.onEvent){ tg.onEvent("viewportChanged", syncViewportHeight); tg.onEvent("fullscreenChanged", syncViewportHeight); } } catch(e){}
+  try { if(tg && tg.onEvent){
+    tg.onEvent("viewportChanged", syncViewportHeight);
+    tg.onEvent("fullscreenChanged", updateFullscreenReserve);
+  } } catch(e){}
   window.addEventListener("resize", syncViewportHeight);
   window.addEventListener("orientationchange", ()=> setTimeout(syncViewportHeight, 300));
   load();
