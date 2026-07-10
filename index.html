@@ -160,12 +160,17 @@
     padding-top: var(--zone-pad-top); transition: background .35s var(--ease-out);
   }
   .zone-p1 { border-right: 1px solid rgba(255,255,255,0.04); }
-  .zone.active { background: radial-gradient(circle at 50% 38%, rgba(255,107,26,0.12) 0%, transparent 68%); }
-  .zone-title { font-family: 'Inter', sans-serif; font-size: 12px; color: var(--dim); text-transform: uppercase; font-weight: 700; letter-spacing: 2px; }
-  .zone-charge { font-family: var(--mono); font-size: var(--zone-charge-font); color: var(--ink); font-weight: 800; margin-top: 6px; line-height: 1; font-variant-numeric: tabular-nums; transition: color .2s; }
+  .zone.active { background: radial-gradient(circle at 50% 35%, rgba(255,107,26,0.16) 0%, transparent 65%); }
+  .zone-title {
+    font-family: 'Inter', sans-serif; font-size: 11px; color: var(--dim); text-transform: uppercase;
+    font-weight: 800; letter-spacing: 2.5px; padding: 3px 12px; border-radius: 999px;
+    border: 1px solid var(--border); background: rgba(6,8,16,.6);
+  }
+  .zone.active .zone-title { color: var(--spark-bright); border-color: rgba(255,107,26,.3); }
+  .zone-charge { font-family: var(--mono); font-size: var(--zone-charge-font); color: var(--mut); font-weight: 800; margin-top: 8px; line-height: 1; font-variant-numeric: tabular-nums; transition: color .2s; }
   .zone.active .zone-charge { color: var(--spark-2); }
-  .zone-status { font-family: var(--display); font-size: var(--zone-status-font); color: var(--safe); line-height: 1; margin-top: clamp(6px, 1.5vh, 10px); transition: color .2s; font-weight: 700; }
-  .zone.active .zone-status { color: var(--spark-bright); text-shadow: 0 0 16px var(--spark-glow); }
+  .zone-status { font-family: var(--display); font-size: var(--zone-status-font); color: var(--safe); line-height: 1; margin-top: clamp(6px, 1.5vh, 10px); transition: color .25s, text-shadow .25s; font-weight: 700; }
+  .zone.active .zone-status { color: var(--spark-bright); text-shadow: 0 0 20px var(--spark-glow); }
 
   /* the wire + spark node */
   .wire-track {
@@ -493,17 +498,29 @@
   .intro-foot { font-family: var(--mono); font-size: 12px; color: var(--dim); margin-top: 18px; text-align: center; line-height: 1.5; }
   .intro-foot b { color: var(--spark); }
   .screen.match-screen { justify-content: center; }
-  .match-wrap { text-align: center; }
-  .match-pulse {
-    width: 72px; height: 72px; margin: 0 auto 20px; border-radius: 50%;
-    border: 3px solid var(--border); border-top-color: var(--spark);
-    animation: spin 1s linear infinite;
+  .match-wrap { text-align: center; display: flex; flex-direction: column; align-items: center; }
+  /* radar-pulse: пульсирующие кольца + ядро */
+  .match-radar { position: relative; width: 120px; height: 120px; margin: 0 auto 24px; display: flex; align-items: center; justify-content: center; }
+  .match-radar-core {
+    width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 26px; z-index: 2;
+    background: radial-gradient(circle at 35% 32%, #fff 0%, var(--spark-2) 38%, var(--spark) 70%, #7c2d12 100%);
+    box-shadow: 0 0 30px var(--spark-glow), 0 0 60px rgba(255,107,26,.2);
+    animation: radarCore 1.6s ease-in-out infinite;
   }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .match-title { font-family: var(--display); font-size: clamp(26px, 7vw, 32px); color: var(--ink); margin-bottom: 8px; line-height: 1.1; }
-  .match-meta { font-family: var(--mono); font-size: 14px; color: var(--mut); margin-bottom: 6px; }
-  .match-timer { font-family: var(--mono); font-size: 17px; color: var(--spark); margin-bottom: 22px; }
-  .match-queue { font-family: var(--mono); font-size: 12px; color: var(--dim); margin-top: 14px; }
+  @keyframes radarCore { 0%,100%{transform:scale(1)} 50%{transform:scale(1.08)} }
+  .match-radar-ring {
+    position: absolute; inset: 0; border-radius: 50%; border: 2px solid var(--spark);
+    animation: radarPulse 2s ease-out infinite;
+  }
+  .match-radar-ring.r2 { animation-delay: 1s; }
+  @keyframes radarPulse { 0%{opacity:.6;transform:scale(.4)} 100%{opacity:0;transform:scale(1.15)} }
+  .match-title { font-family: var(--display); font-size: clamp(24px, 6.5vw, 30px); color: var(--ink); margin-bottom: 10px; line-height: 1.1; font-weight: 700; }
+  .match-dots { display: inline-block; width: 1.5em; text-align: left; }
+  .match-dots::after { content: ''; animation: matchDots 1.4s steps(4) infinite; }
+  @keyframes matchDots { 0%{content:''} 25%{content:'.'} 50%{content:'..'} 75%,100%{content:'...'} }
+  .match-meta { font-family: var(--mono); font-size: 13px; color: var(--mut); margin-bottom: 4px; }
+  .match-timer { font-family: var(--mono); font-size: 18px; color: var(--spark); margin-bottom: 24px; font-weight: 800; font-variant-numeric: tabular-nums; }
 
   .wallet-bal { font-family: var(--mono); font-size: 16px; color: var(--mut); margin-bottom: 14px; }
   .wallet-bal b { color: var(--safe); font-size: 21px; }
@@ -779,7 +796,7 @@
       --overlay-max: min(380px, 100%);
     }
     .zone-title { font-size: 12px; }
-    .match-pulse { width: 56px; height: 56px; margin-bottom: 14px; }
+    .match-radar { width: 96px; height: 96px; margin-bottom: 16px; }
     .res-heat-chip .v { font-size: 28px; }
     .res-actions .screen-btn { margin-bottom: 8px; }
     .sheet-card { max-height: 92svh; }
@@ -878,7 +895,7 @@
     .intro-pitch { margin-bottom: 10px; padding: 10px 12px; }
     .global-volt-container { top: 8px; }
     .zone-status { font-size: clamp(22px, 6vw, 28px); }
-    .match-pulse { width: 52px; height: 52px; margin-bottom: 12px; }
+    .match-radar { width: 88px; height: 88px; margin-bottom: 14px; }
     .match-title { font-size: 26px; }
     .res-verdict { font-size: 40px; }
     .res-amt { font-size: 32px; margin-bottom: 12px; }
@@ -996,12 +1013,12 @@
       <div class="zone zone-p1" id="zoneP1">
         <div class="zone-title">ТЫ</div>
         <div class="zone-charge" id="chargeP1">—</div>
-        <div class="zone-status" id="statusP1">SAFE</div>
+        <div class="zone-status" id="statusP1">—</div>
       </div>
       <div class="zone zone-p2" id="zoneP2">
         <div class="zone-title">СОПЕРНИК</div>
         <div class="zone-charge" id="chargeP2">—</div>
-        <div class="zone-status" id="statusP2">SAFE</div>
+        <div class="zone-status" id="statusP2">—</div>
       </div>
     </div>
 
@@ -1117,15 +1134,18 @@
     </div>
   </div>
 
-  <!-- MATCHMAKING -->
+  <!-- MATCHMAKING v2 -->
   <div class="screen match-screen" id="matchScreen">
     <div class="match-wrap">
-      <div class="match-pulse"></div>
-      <div class="match-title" id="matchTitle">Ищем соперника…</div>
-      <div class="match-meta" id="matchMeta">Ставка: 50 USDT</div>
+      <div class="match-radar">
+        <div class="match-radar-ring"></div>
+        <div class="match-radar-ring r2"></div>
+        <div class="match-radar-core">⚡</div>
+      </div>
+      <div class="match-title" id="matchTitle">Поиск соперника<span class="match-dots"></span></div>
+      <div class="match-meta" id="matchMeta">Ставка 50 USDT · банк 100</div>
       <div class="match-timer" id="matchTimer">0:00</div>
       <button type="button" class="screen-btn ghost" id="matchCancelBtn">ОТМЕНА</button>
-      <div class="match-queue" id="matchQueue">Поиск по глобальной очереди…</div>
     </div>
   </div>
 
@@ -2308,13 +2328,13 @@
     elSpark.className = "spark " + (holder === 1 ? "pos-1" : "pos-2");
     elVolt.style.color = "#fff";
     elVolt.textContent = "100";
-    elStatusP1.textContent = "ГОТОВ"; elStatusP2.textContent = "ГОТОВ";
+    elStatusP1.textContent = "ГОТОВ?"; elStatusP2.textContent = "ГОТОВ?";
     elChargeP1.textContent = "—"; elChargeP2.textContent = "—";
     elZoneP1.classList.remove("active"); elZoneP2.classList.remove("active");
     elPassBtn.disabled = true;
     elPassBtn.className = "pass-btn";
-    elBtnText.textContent = "WAITING";
-    elBtnSub.textContent = "starting…";
+    elBtnText.textContent = "ГОТОВ?";
+    elBtnSub.textContent = "приготовься…";
 
     if(role === "solo" && holder === 2) setAITarget();
 
@@ -2456,8 +2476,8 @@
 
     elPassBtn.disabled = true;
     elPassBtn.className = "pass-btn locked-state";
-    elBtnText.textContent = "ВЗРЫВ";
-    elBtnSub.textContent = holder === 1 ? "ТЫ ДЕРЖАЛ МЯЧ" : "СОПЕРНИК ДЕРЖАЛ МЯЧ";
+    elBtnText.textContent = "💥 ВЗРЫВ";
+    elBtnSub.textContent = holder === 1 ? "ты держал мяч" : "соперник сгорел";
     spawnDischarge();
 
     setTimeout(resolveRound, 1500);
@@ -2550,20 +2570,20 @@
       prevHolder = holder; prevLockout = lockout;
       if(holder === 1){
         elZoneP1.classList.add("active"); elZoneP2.classList.remove("active");
-        elStatusP1.innerText = lockout ? "БЛОК" : "ДЕРЖУ";
+        elStatusP1.innerText = lockout ? "БЛОК" : "ТВОЙ ХОД";
         elStatusP2.innerText = "ЖДЁТ";
         elSpark.className = "spark pos-1 " + (lockout ? "locked" : "");
       } else {
         elZoneP2.classList.add("active"); elZoneP1.classList.remove("active");
         elStatusP1.innerText = "ЖДЁТ";
-        elStatusP2.innerText = lockout ? "БЛОК" : "ДЕРЖУ";
+        elStatusP2.innerText = lockout ? "БЛОК" : "ТВОЙ ХОД";
         elSpark.className = "spark pos-2 " + (lockout ? "locked" : "");
       }
       updateControls();
     }
-    // pass counters
-    if(youPasses !== prevYP){ elChargeP1.textContent = youPasses + " пас"; prevYP = youPasses; }
-    if(oppPasses !== prevOP){ elChargeP2.textContent = oppPasses + " пас"; prevOP = oppPasses; }
+    // pass counters — сочный формат
+    if(youPasses !== prevYP){ elChargeP1.textContent = youPasses === 0 ? "—" : youPasses + "×"; prevYP = youPasses; }
+    if(oppPasses !== prevOP){ elChargeP2.textContent = oppPasses === 0 ? "—" : oppPasses + "×"; prevOP = oppPasses; }
     // controls (diff-guarded internally; safe every frame, keeps heat readout live)
     updateControls();
   }
@@ -2571,11 +2591,13 @@
   let prevCtrlState = "";
   function updateControls(){
     if(phase !== "running") return;
-    // вычисляем состояние кнопки
     let state, txt, sub, disabled;
     if(holder === 1){
-      if(lockout){ state = "pass-btn cooldown-state"; txt = "БЛОК"; sub = "держись · мяч заряжается"; disabled = true; }
-      else { state = "pass-btn"; txt = "ПЕРЕДАТЬ"; sub = Math.floor(m * 100) + " нагрев · кинуть мяч"; disabled = false; }
+      if(lockout){
+        state = "pass-btn cooldown-state"; txt = "⏳ ЗАРЯД"; sub = "мяч заряжается — держись"; disabled = true;
+      } else {
+        state = "pass-btn"; txt = "ПЕРЕДАТЬ ⚡"; sub = "нагрев " + Math.floor(m * 100) + "°"; disabled = false;
+      }
     } else {
       state = "pass-btn"; txt = "ОЖИДАНИЕ"; sub = "мяч у соперника"; disabled = true;
     }
@@ -2824,7 +2846,7 @@
   });
 
   // ============ INIT ============
-  const BUILD_ID = "20260711e";
+  const BUILD_ID = "20260711f";
   // Cache-bust: Telegram кэширует страницу до 10 минут (max-age=600).
   // Принудительно перезагружаем с актуальным ?v=BUILD_ID. Мелькания больше нет —
   // lobbyIn анимация (реальная причина flash) удалена, а return прерывает INIT
