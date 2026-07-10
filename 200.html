@@ -2782,17 +2782,10 @@
   });
 
   // ============ INIT ============
-  const BUILD_ID = "20260710m";
-  try {
-    // cache-bust: перезагружаем с актуальным ?v=BUILD_ID.
-    // Проверяем ЗНАЧЕНИЕ v, а не его наличие — иначе застреваем на старой версии.
-    const urlV = new URLSearchParams(location.search).get("v");
-    if(urlV !== BUILD_ID){
-      sessionStorage.setItem("hotwire_build", BUILD_ID);
-      location.replace(location.pathname + "?v=" + BUILD_ID + location.hash);
-      return; // прерываем INIT — страница сейчас перезагрузится
-    }
-  } catch(e){}
+  const BUILD_ID = "20260710n";
+  // Cache-bust через location.replace убран — он вызывал мелькание при загрузке
+  // (intro → лобби → intro при перезагрузке). Вместо этого полагаемся на
+  // Cache-Control meta + Telegram CDN cache-bust через BuildHash в URL ссылки в @BotFather.
 
   loadMpLogs();
   mpLog("app:init", { ua: navigator.userAgent.slice(0, 80), signal: SIGNAL_URL });
