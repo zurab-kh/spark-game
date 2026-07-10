@@ -294,10 +294,16 @@
 
   /* === LOBBY v2 — полностью новый layout === */
 
-  /* верхняя панель: онлайн + статистика в строку */
-  .lobby-topbar {
-    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  /* компактная статистика в одну строку */
+  .lobby-stats-row {
+    display: flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: wrap;
+    font-family: var(--mono); font-size: 11px; color: var(--dim);
+    padding: 2px 0;
   }
+  .lobby-stats-row b { color: var(--ink); font-weight: 800; }
+  .lobby-stats-row b.fire { color: var(--spark-2); }
+  .lobby-stats-row b.pl-pos { color: var(--safe); }
+  .lobby-stats-row .ls-sep { opacity: .3; }
   .online-bar {
     display: flex; align-items: center; gap: 6px;
     font-family: var(--mono); font-size: 11px; color: var(--mut);
@@ -1056,33 +1062,19 @@
   <div class="screen menu-screen" id="menuScreen">
     <div class="menu-wrap">
 
-      <!-- верх: онлайн + статистика -->
-      <div class="lobby-topbar">
-        <div class="online-bar">
-          <span class="online-dot"></span><span id="onlineCount">…</span> онлайн
-        </div>
-        <div class="lobby-stats-strip">
-          <div class="stat"><div class="v" id="lobbyWL">0–0</div><div class="k">П–П</div></div>
-          <div class="stat"><div class="v fire" id="lobbyStreak">0</div><div class="k">СЕРИЯ</div></div>
-          <div class="stat"><div class="v" id="lobbyDuels">0</div><div class="k">ДУЭЛИ</div></div>
-          <div class="stat"><div class="v pl-pos" id="lobbyNet">+0.00</div><div class="k">ПРОФИТ</div></div>
-        </div>
-      </div>
-
-      <!-- потенциал выигрыша — крупный фокус -->
+      <!-- потенциал выигрыша — единственный фокус сверху -->
       <div class="lobby-pot">
-        <div class="lobby-pot-label">ТЫ МОЖЕШЬ ВЫИГРАТЬ</div>
+        <div class="lobby-pot-label">ВЫИГРАЙ</div>
         <div class="lobby-pot-amount" id="potPreview">95<span class="u">USDT</span></div>
-        <div class="lobby-pot-sub">ставка <b id="playAmtAi">50</b> · банк удвоится · комиссия 5%</div>
+        <div class="lobby-pot-sub">ставка <b id="playAmtAi">50</b> USDT</div>
       </div>
 
-      <!-- выбор ставки — большие плитки -->
+      <!-- выбор ставки -->
       <div class="lobby-stake">
-        <div class="lobby-stake-label">ВЫБЕРИ СТАВКУ</div>
         <div class="chips" id="stakeChips"></div>
       </div>
 
-      <!-- гигантская кнопка -->
+      <!-- главная кнопка -->
       <div class="play-hit" id="playAiWrap">
         <button class="play-big" id="playAiBtn">ИГРАТЬ <span class="amt">▶</span></button>
       </div>
@@ -1096,22 +1088,31 @@
         <span class="friend-arrow">→</span>
       </button>
 
-      <!-- недавние дуэли -->
-      <div class="lobby-recent">
-        <div class="lobby-recent-head">
-          <span class="lobby-recent-label">Недавние дуэли</span>
-          <button type="button" id="historyBtn" class="lobby-recent-more">всё →</button>
-        </div>
-        <div class="lobby-recent-feed" id="lobbyRecentFeed">
-          <div class="lobby-recent-empty">Дуэлей пока нет — жми ИГРАТЬ</div>
-        </div>
+      <!-- статистика — компактная строка, только если есть дуэли -->
+      <div class="lobby-stats-row" id="lobbyStatsRow" style="display:none;">
+        <span class="ls-item"><b id="lobbyWL">0–0</b> П-П</span>
+        <span class="ls-sep">·</span>
+        <span class="ls-item"><b id="lobbyStreak" class="fire">0</b> серия</span>
+        <span class="ls-sep">·</span>
+        <span class="ls-item"><b id="lobbyNet" class="pl-pos">+0</b> профит</span>
+        <span class="ls-sep">·</span>
+        <span class="ls-item"><b id="lobbyDuels">0</b> дуэлей</span>
       </div>
 
-      <!-- нижние pills -->
+      <!-- недавние дуэли — только если есть -->
+      <div class="lobby-recent" id="lobbyRecentWrap" style="display:none;">
+        <div class="lobby-recent-head">
+          <span class="lobby-recent-label">Недавние</span>
+          <button type="button" id="historyBtn" class="lobby-recent-more">всё →</button>
+        </div>
+        <div class="lobby-recent-feed" id="lobbyRecentFeed"></div>
+      </div>
+
+      <!-- нижние ссылки -->
       <nav class="menu-pills">
-        <button type="button" id="rulesBtn">Правила</button>
+        <button type="button" id="rulesBtn">Как играть</button>
         <button type="button" id="fairnessBtn">Честность</button>
-        <button type="button" class="pill-warn" id="resetBtn">Сброс</button>
+        <button type="button" id="resetBtn">Сброс</button>
       </nav>
     </div>
   </div>
@@ -1566,6 +1567,7 @@
     }).join("");
   }
   function renderLobby(){
+    const hasDuels = (S.totalDuels || 0) > 0;
     if($("lobbyWL")) $("lobbyWL").textContent = S.wins + "–" + S.losses;
     if($("lobbyStreak")) $("lobbyStreak").textContent = String(S.streak || 0);
     if($("lobbyDuels")) $("lobbyDuels").textContent = String(S.totalDuels || 0);
@@ -1573,8 +1575,11 @@
     const netEl = $("lobbyNet");
     if(netEl){
       netEl.textContent = (pl >= 0 ? "+" : "−") + fmt(Math.abs(pl));
-      netEl.className = "v " + (pl > 0 ? "pl-pos" : pl < 0 ? "pl-neg" : "");
+      netEl.className = (pl > 0 ? "pl-pos" : pl < 0 ? "pl-neg" : "");
     }
+    // показываем статистику и недавние только когда есть сыгранные дуэли
+    if($("lobbyStatsRow")) $("lobbyStatsRow").style.display = hasDuels ? "" : "none";
+    if($("lobbyRecentWrap")) $("lobbyRecentWrap").style.display = hasDuels ? "" : "none";
     renderLobbyRecent();
   }
   function updatePotPreview(){
@@ -2654,7 +2659,7 @@
     }).join("");
   }
 
-  function refreshMenu(){ renderStakes(); renderLobby(); renderHistory(); updatePlayButtons(); updateOnlineCount(); }
+  function refreshMenu(){ renderStakes(); renderLobby(); renderHistory(); updatePlayButtons(); }
   function updateOnlineCount(){
     const el = $("onlineCount");
     if(el) el.textContent = String(rint(90, 240));
@@ -2819,7 +2824,7 @@
   });
 
   // ============ INIT ============
-  const BUILD_ID = "20260711d";
+  const BUILD_ID = "20260711e";
   // Cache-bust: Telegram кэширует страницу до 10 минут (max-age=600).
   // Принудительно перезагружаем с актуальным ?v=BUILD_ID. Мелькания больше нет —
   // lobbyIn анимация (реальная причина flash) удалена, а return прерывает INIT
