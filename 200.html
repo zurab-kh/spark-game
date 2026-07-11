@@ -1702,9 +1702,10 @@
     mode = "ai";
     matchCancelled = false;
     matchStartedAt = Date.now();
-    $("matchTitle").textContent = "Ищем соперника…";
-    $("matchMeta").textContent = `Ставка: ${uiStake} USDT · Банк ${uiStake * 2} USDT`;
-    $("matchQueue").textContent = `Онлайн ~${rint(90, 240)} · ${rint(4, 22)} на ${uiStake} USDT`;
+    const mt = $("matchTitle");
+    if(mt) mt.innerHTML = "Поиск соперника<span class=\"match-dots\"></span>";
+    const mm = $("matchMeta");
+    if(mm) mm.textContent = `Ставка ${uiStake} USDT · банк ${uiStake * 2}`;
     showScreen("matchScreen");
     updateMatchTimer();
     matchInterval = setInterval(updateMatchTimer, 250);
@@ -1713,8 +1714,7 @@
       if(matchCancelled) return;
       clearMatchmaking();
       const opp = pick(RIVALS);
-      $("matchTitle").textContent = `Соперник: @${opp}`;
-      $("matchQueue").textContent = "Начинаем дуэль…";
+      if(mt) mt.innerHTML = `Соперник: <b style="color:var(--spark-2)">@${opp}</b>`;
       setTimeout(()=>{
         if(matchCancelled) return;
         role = "solo";
@@ -2846,7 +2846,7 @@
   });
 
   // ============ INIT ============
-  const BUILD_ID = "20260711f";
+  const BUILD_ID = "20260711g";
   // Cache-bust: Telegram кэширует страницу до 10 минут (max-age=600).
   // Принудительно перезагружаем с актуальным ?v=BUILD_ID. Мелькания больше нет —
   // lobbyIn анимация (реальная причина flash) удалена, а return прерывает INIT
